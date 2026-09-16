@@ -74,3 +74,57 @@ new IntersectionObserver(entries => { visible = entries[0].isIntersecting; syncA
 window.addEventListener('resize', resize);
 document.querySelector('.hero').addEventListener('pointermove', event => { pointer.x = event.clientX / width - .5; pointer.y = event.clientY / height - .5; });
 resize(); syncAnimation();
+
+// Sticky orientation; scheduled once per frame rather than per scroll event.
+const header = document.querySelector('.header');
+const progress = document.querySelector('.reading-progress');
+const sectionLinks = [...nav.querySelectorAll('a[href^="#"]')];
+const sectionTargets = sectionLinks.map(link => document.querySelector(link.getAttribute('href')));
+let scrollFrame = 0;
+function updateOrientation() {
+  scrollFrame = 0;
+  header.classList.toggle('scrolled', window.scrollY > 40);
+  const distance = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.transform = `scaleX(${distance > 0 ? Math.min(window.scrollY / distance, 1) : 0})`;
+  let active = -1;
+  sectionTargets.forEach((section, index) => { if (section && section.getBoundingClientRect().top <= 155) active = index; });
+  sectionLinks.forEach((link, index) => { if (index === active) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current'); });
+}
+function scheduleOrientation() { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateOrientation); }
+window.addEventListener('scroll', scheduleOrientation, { passive: true });
+window.addEventListener('resize', scheduleOrientation);
+document.addEventListener('toggle', scheduleOrientation, true);
+updateOrientation();
+
+// Progressive enhancement: without JavaScript every workflow step stays readable.
+const stepList = document.querySelector('.workflow-steps');
+const steps = [...stepList.querySelectorAll('.workflow-step')];
+const panels = steps.map(step => document.querySelector(step.getAttribute('href')));
+stepList.setAttribute('role', 'tablist');
+function selectStep(index, focus = false) {
+  steps.forEach((step, i) => {
+    step.setAttribute('aria-selected', String(i === index));
+    step.tabIndex = i === index ? 0 : -1;
+    panels[i].hidden = i !== index;
+  });
+  if (focus) steps[index].focus();
+  scheduleOrientation();
+}
+steps.forEach((step, index) => {
+  step.setAttribute('role', 'tab');
+  step.setAttribute('aria-controls', panels[index].id);
+  panels[index].setAttribute('role', 'tabpanel');
+  panels[index].setAttribute('aria-labelledby', step.id);
+  panels[index].tabIndex = 0;
+  step.addEventListener('click', event => { event.preventDefault(); selectStep(index); });
+  step.addEventListener('keydown', event => {
+    const keys = { ArrowRight: (index + 1) % steps.length, ArrowLeft: (index - 1 + steps.length) % steps.length, Home: 0, End: steps.length - 1 };
+    if (event.key in keys) { event.preventDefault(); selectStep(keys[event.key], true); }
+    if (event.key === ' ') { event.preventDefault(); selectStep(index); }
+  });
+});
+selectStep(Math.max(0, panels.findIndex(panel => '#' + panel.id === location.hash)));
+window.addEventListener('hashchange', () => {
+  const index = panels.findIndex(panel => '#' + panel.id === location.hash);
+  if (index >= 0) { selectStep(index); panels[index].scrollIntoView(); }
+});
