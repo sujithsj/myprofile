@@ -50,7 +50,7 @@ Open `http://localhost:8000`. Serve the site over HTTP/HTTPS rather than opening
 
 - `index.html`: biography, expertise, recommendations, contact details, and metadata.
 - `src/style.css`: responsive layouts and visual theme.
-- `src/main.js`: original particle sculpture, mobile navigation, section-aware sticky header, reading progress, keyboard-accessible workflow tabs, email clipboard, and reduced-motion behavior.
+- `src/main.js`: minimal animated signal field, mobile navigation, section-aware sticky header, reading progress, keyboard-accessible workflow tabs, email clipboard, and reduced-motion behavior.
 - `assets/sujith.jpeg`: portrait from the previous profile.
 
 Primary positioning and AI/life sciences content supplied directly by Sujith, with a Forward Deployed AI Engineer focus. Supporting content sources: https://sujithsj.github.io/myprofile/ and the publicly accessible portion of https://www.linkedin.com/in/sujith-kumar-sirisanagandla-76898841/. All six recommendations and colleague portraits are restored from the old profile. Long recommendations expand in place to reveal the complete original wording. No unverified employment dates, projects, or achievements were added.
